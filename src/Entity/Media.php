@@ -2,12 +2,15 @@
 
 namespace App\Entity;
 
+use AllowDynamicProperties;
 use App\Enum\MediaTypeEnum;
 use App\Repository\MediaRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: MediaRepository::class)]
+#[AllowDynamicProperties] #[ORM\Entity(repositoryClass: MediaRepository::class)]
 class Media
 {
     #[ORM\Id]
@@ -38,6 +41,30 @@ class Media
 
     #[ORM\Column]
     private array $casting = [];
+
+    /**
+     * @var Collection<int, Comment>
+     */
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'mediaId', orphanRemoval: true)]
+    private Collection $comments;
+
+    /**
+     * @var Collection<int, MediaLanguage>
+     */
+    #[ORM\ManyToMany(targetEntity: MediaLanguage::class, mappedBy: 'mediaId')]
+    private Collection $mediaLanguages;
+
+    /**
+     * @var Collection<int, MediaLanguage>
+     */
+
+
+    public function __construct()
+    {
+        $this->comments = new ArrayCollection();
+        $this->languageId = new ArrayCollection();
+        $this->mediaLanguages = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -143,6 +170,90 @@ class Media
     public function setCasting(array $casting): static
     {
         $this->casting = $casting;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setMediaId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getMediaId() === $this) {
+                $comment->setMediaId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MediaLanguage>
+     */
+    public function getLanguageId(): Collection
+    {
+        return $this->languageId;
+    }
+
+    public function addLanguageId(MediaLanguage $languageId): static
+    {
+        if (!$this->languageId->contains($languageId)) {
+            $this->languageId->add($languageId);
+            $languageId->addMediaId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLanguageId(MediaLanguage $languageId): static
+    {
+        if ($this->languageId->removeElement($languageId)) {
+            $languageId->removeMediaId($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MediaLanguage>
+     */
+    public function getMediaLanguages(): Collection
+    {
+        return $this->mediaLanguages;
+    }
+
+    public function addMediaLanguage(MediaLanguage $mediaLanguage): static
+    {
+        if (!$this->mediaLanguages->contains($mediaLanguage)) {
+            $this->mediaLanguages->add($mediaLanguage);
+            $mediaLanguage->addMediaId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMediaLanguage(MediaLanguage $mediaLanguage): static
+    {
+        if ($this->mediaLanguages->removeElement($mediaLanguage)) {
+            $mediaLanguage->removeMediaId($this);
+        }
 
         return $this;
     }
