@@ -55,6 +55,24 @@ class Media
     private Collection $mediaLanguages;
 
     /**
+     * @var Collection<int, CategoryMedia>
+     */
+    #[ORM\OneToMany(targetEntity: CategoryMedia::class, mappedBy: 'mediaId', orphanRemoval: true)]
+    private Collection $categoryMedia;
+
+    /**
+     * @var Collection<int, WatchHistory>
+     */
+    #[ORM\OneToMany(targetEntity: WatchHistory::class, mappedBy: 'mediaId', orphanRemoval: true)]
+    private Collection $watchHistories;
+
+    /**
+     * @var Collection<int, PlaylistMedia>
+     */
+    #[ORM\OneToMany(targetEntity: PlaylistMedia::class, mappedBy: 'mediaId', orphanRemoval: true)]
+    private Collection $playlistMedia;
+
+    /**
      * @var Collection<int, MediaLanguage>
      */
 
@@ -64,6 +82,9 @@ class Media
         $this->comments = new ArrayCollection();
         $this->languageId = new ArrayCollection();
         $this->mediaLanguages = new ArrayCollection();
+        $this->categoryMedia = new ArrayCollection();
+        $this->watchHistories = new ArrayCollection();
+        $this->playlistMedia = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -253,6 +274,96 @@ class Media
     {
         if ($this->mediaLanguages->removeElement($mediaLanguage)) {
             $mediaLanguage->removeMediaId($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CategoryMedia>
+     */
+    public function getCategoryMedia(): Collection
+    {
+        return $this->categoryMedia;
+    }
+
+    public function addCategoryMedium(CategoryMedia $categoryMedium): static
+    {
+        if (!$this->categoryMedia->contains($categoryMedium)) {
+            $this->categoryMedia->add($categoryMedium);
+            $categoryMedium->setMediaId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCategoryMedium(CategoryMedia $categoryMedium): static
+    {
+        if ($this->categoryMedia->removeElement($categoryMedium)) {
+            // set the owning side to null (unless already changed)
+            if ($categoryMedium->getMediaId() === $this) {
+                $categoryMedium->setMediaId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, WatchHistory>
+     */
+    public function getWatchHistories(): Collection
+    {
+        return $this->watchHistories;
+    }
+
+    public function addWatchHistory(WatchHistory $watchHistory): static
+    {
+        if (!$this->watchHistories->contains($watchHistory)) {
+            $this->watchHistories->add($watchHistory);
+            $watchHistory->setMediaId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWatchHistory(WatchHistory $watchHistory): static
+    {
+        if ($this->watchHistories->removeElement($watchHistory)) {
+            // set the owning side to null (unless already changed)
+            if ($watchHistory->getMediaId() === $this) {
+                $watchHistory->setMediaId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlaylistMedia>
+     */
+    public function getPlaylistMedia(): Collection
+    {
+        return $this->playlistMedia;
+    }
+
+    public function addPlaylistMedium(PlaylistMedia $playlistMedium): static
+    {
+        if (!$this->playlistMedia->contains($playlistMedium)) {
+            $this->playlistMedia->add($playlistMedium);
+            $playlistMedium->setMediaId($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlaylistMedium(PlaylistMedia $playlistMedium): static
+    {
+        if ($this->playlistMedia->removeElement($playlistMedium)) {
+            // set the owning side to null (unless already changed)
+            if ($playlistMedium->getMediaId() === $this) {
+                $playlistMedium->setMediaId(null);
+            }
         }
 
         return $this;
